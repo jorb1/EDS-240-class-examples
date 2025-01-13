@@ -1,0 +1,7 @@
+---
+title: "Week 2 Discussion"
+subtitle: "?"
+author: Bailey Jorgensen"
+date: 2025-01-13
+toc: true
+---
