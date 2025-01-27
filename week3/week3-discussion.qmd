@@ -1,0 +1,38 @@
+---
+title: "week3-discussion"
+format: html
+---
+
+```{r}
+#| eval: true
+#| echo: false
+library(ggplot2)
+library(palmerpenguins)
+library(tidyverse)
+```
+
+```{r}
+#| warning: false
+#| eval: true
+#| message: false
+#| echo: false
+#| fig-alt: "A histogram showing the distribution of body mass for 3 penguin species, showing that Gentoos are on average 2000 grams heavier than Adelie's and Chinstraps"
+
+ggplot(data = penguins, aes(x = body_mass_g, fill = species)) +
+  geom_histogram(alpha = 0.5, 
+                 position = "identity") +
+  scale_fill_manual(values = c("darkorange","purple","cyan4")) +
+  labs(x = "Body mass (g)",
+       y = "Frequency",
+       title = "Penguin body masses")
+```
+
+![](nyt-monthly-temp.png){fig-alt="Dot plot of monthly global temps from 1850-2023, hotter or colder than the 20th century average, where every month has been hotter than average since 1975."}
+
+
+
+<img src="chapman-etal-2024.png" alt="Global heatmap showing that most GBIF observations come from countries with the most wealth, such as the United States." width="700px">
+
+
+
+
