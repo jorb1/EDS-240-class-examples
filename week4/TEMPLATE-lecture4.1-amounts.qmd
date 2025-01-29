@@ -175,11 +175,13 @@ jobs_clean |>
   mutate(occupation = fct_reorder(.f = occupation, .x = total_earnings)) |> 
   pivot_longer(cols = c(total_earnings_female, total_earnings_male), names_to = "group", values_to = "earnings_by_group") |> 
   mutate(sex = str_remove(string = group, pattern = "total_earnings_")) |>
-  ggplot(aes(x=occupation)) +
-  geom_point() +
+  ggplot(aes(x=occupation, y = earnings_by_group, color = sex)) +
+  geom_point(position = position_dodge(width = 0.5)) +
   geom_linerange(aes(xmin = occupation, xmax = occupation,
-                     ymin = 0, ymax = earnings_by_group))+
-  coord_flip()
+                     ymin = 0, ymax = earnings_by_group),
+                 position = position_dodge(width = 0.5)) +
+  coord_flip() + 
+  theme_minimal()
 ```
 
 ## Heatmap
@@ -199,23 +201,36 @@ analysts <- jobs_clean |>
   filter(str_detect(string = occupation, pattern = "analyst")) |> 
   select(year, occupation, total_earnings)
 
-# # determine order of occupations based on highest total_earnings in 2016 ----
-# order_2016 <- analysts |> 
-#   filter(year == 2016) |> 
-#   arrange(total_earnings) |> 
-#   mutate(order = row_number()) |> 
-#   select(occupation, order) 
-# 
-# # join order with rest of data to set factor levels ----
-# heatmap_order <- analysts |> 
-#   left_join(order_2016, by = "occupation") |> 
-#   mutate(occupation = fct_reorder(occupation, order))
+# determine order of occupations based on highest total_earnings in 2016 ----
+order_2016 <- analysts |>
+  filter(year == 2016) |>
+  arrange(total_earnings) |>
+  mutate(order = row_number()) |>
+  select(occupation, order)
+
+# join order with rest of data to set factor levels ----
+heatmap_order <- analysts |>
+  left_join(order_2016, by = "occupation") |>
+  mutate(occupation = fct_reorder(occupation, order))
 ```
 
 ```{r}
 #| eval: true
 #| echo: true
 # create heatmap ----
+ggplot(heatmap_order, aes(x=year, y=occupation, fill = total_earnings)) +
+  geom_tile() +
+  labs(fill = "Total Earnings") +
+  coord_fixed() +
+  scale_fill_viridis_c(labels = label_currency(scale = 0.001, suffix = "k")) +
+  scale_y_discrete(labels = label_wrap(30)) +
+  guides(fill = guide_colorbar(barwidth = 15, barheight = 0.75,
+                               title.position = "top")) +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    axis.title = element_blank()
+  ) 
 ```
 
 ## Dumbbell plot
@@ -261,5 +276,16 @@ subset_jobs <- rbind(f75, m75, f50) |>
 #| eval: true
 #| echo: true
 #| out-width: "100%"
-# dumbbell plot ----
+ggplot(subset_jobs) +
+  geom_point(aes(x = total_earnings_male, y = occupation),
+             color = "skyblue4", size = 2.5) +
+  geom_linerange(aes(y = occupation,
+                     xmin = total_earnings_female, xmax = total_earnings_male)) +
+  geom_point(aes(x = total_earnings_female, y = occupation),
+             color = "skyblue", size = 2.5) +
+  facet_wrap(~group_label, nrow = 3, scales = "free_y") +
+  scale_x_continuous(labels = label_dollar(scale = 0.001, suffix = "k"),
+                     breaks = c(25000, 50000, 75000, 100000)) +
+  theme_minimal()
+  
 ```
